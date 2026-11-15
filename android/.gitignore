@@ -12,3 +12,41 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Встроенные файлы Android Studio / IntelliJ
+*.iml
+.gradle/
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Файлы сборки
+*.apk
+*.aar
+*.ap_
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+release/
+
+# Логи и временные файлы
+*.log
+*.hprof
+
+# Keystore
+*.jks
+*.keystore
+!debug.keystore
+
+# Нативные библиотеки
+*.so
+
+# Прочее
+.navigation/
