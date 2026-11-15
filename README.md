@@ -1,6 +1,6 @@
 # gallery
 
-A new Flutter project.
+Gallery App on Flutter
 
 ## Getting Started
 
