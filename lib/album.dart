@@ -6,6 +6,7 @@ class Album {
   final int count;
   final Uint8List? cover;
   final String? parentId;
+  final String? firstAssetId;
 
-  Album(this.id, this.name, this.count, this.cover, {this.parentId});
+  Album(this.id, this.name, this.count, this.cover, {this.parentId, this.firstAssetId});
 }

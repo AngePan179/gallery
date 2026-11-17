@@ -20,7 +20,11 @@ class Folders extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: album.cover != null
-                  ? Image.memory(album.cover!, fit: BoxFit.cover)
+                  ? Image.memory(
+                  album.cover!,
+                  fit: BoxFit.cover,
+                  gaplessPlayback: true,
+              )
                   : Container(color: Colors.grey.shade400),
             ),
           ),

@@ -7,12 +7,12 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
 class MediaViewerScreen extends StatefulWidget {
-  final List<AssetEntity> assets;
+  final ValueNotifier<List<AssetEntity>> assetsNotifier;
   final int initialIndex;
 
   const MediaViewerScreen({
     super.key,
-    required this.assets,
+    required this.assetsNotifier,
     required this.initialIndex,
   });
 
@@ -25,14 +25,35 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
   late int _currentIndex;
   bool _showUi = true;
 
+  List<AssetEntity> get assets => widget.assetsNotifier.value;
+
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _currentIndex);
 
+    widget.assetsNotifier.addListener(_onAssetsChanged);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _precacheNearbyImages();
+    });
+  }
+  
+  void _onAssetsChanged(){
+    if(!mounted) return;
+    final newAssets = widget.assetsNotifier.value;
+    
+    if(newAssets.isEmpty){
+      Navigator.of(context).pop();
+      return;
+    }
+    
+    if(_currentIndex >= newAssets.length){
+      _currentIndex = newAssets.length - 1;_pageController.jumpToPage(_currentIndex);
+    }
+    setState(() {
+      
     });
   }
 
@@ -44,8 +65,8 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
 
   void _precacheNearbyImages() {
     for (int i = _currentIndex - 1; i <= _currentIndex + 1; i++) {
-      if (i >= 0 && i < widget.assets.length) {
-        final asset = widget.assets[i];
+      if (i >= 0 && i < assets.length) {
+        final asset = assets[i];
         if (asset.type == AssetType.image) {
           asset.file.then((file) {
             if (file != null && mounted) {
@@ -130,13 +151,13 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
 
     final deleted = await PhotoManager.editor.deleteWithIds([asset.id]);
     if(deleted.isNotEmpty && mounted){
-      setState(() {
-        widget.assets.removeAt(_currentIndex);
-      });
-      if(widget.assets.isEmpty){
+      final newList = [...assets]..removeWhere((a) => a.id == asset.id);
+      widget.assetsNotifier.value = newList;
+      
+      if(newList.isEmpty){
         Navigator.of(context).pop();
-      }else if(_currentIndex >= widget.assets.length){
-        _currentIndex = widget.assets.length - 1;
+      }else if(_currentIndex >= newList.length){
+        _currentIndex = newList.length - 1;
         _pageController.jumpToPage(_currentIndex);
       }
     }
@@ -194,14 +215,28 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
 
   @override
   void dispose() {
+    widget.assetsNotifier.removeListener(_onAssetsChanged);
     _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final DateTime displayDate = widget.assets[_currentIndex].createDateTime;
-    final asset = widget.assets[_currentIndex];
+    if(assets.isEmpty){
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Text('Нет файлов', style:  TextStyle(color: Colors.white),),
+        ),
+      );
+    }
+
+    if(_currentIndex >= assets.length){
+      _currentIndex = assets.length - 1;
+    }
+
+    final asset = assets[_currentIndex];
+    final displayDate = asset.createDateTime;
 
     return Scaffold(
       backgroundColor: DesignColors.background,
@@ -233,7 +268,7 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
                   ),
                   const Spacer(),
                   Text(
-                    '${_currentIndex + 1} / ${widget.assets.length}',
+                    '${_currentIndex + 1} / ${assets.length}',
                     style: const TextStyle(color: Colors.white, fontSize: 18),
                   ),
                 ],
@@ -245,13 +280,13 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
           PageView.builder(
             controller: _pageController,
             dragStartBehavior: DragStartBehavior.down,
-            itemCount: widget.assets.length,
+            itemCount: assets.length,
             onPageChanged: (index) {
               setState(() => _currentIndex = index);
               _precacheNearbyImages();
             },
             itemBuilder: (context, index) {
-              final a = widget.assets[index];
+              final a = assets[index];
               if (a.type == AssetType.video) {
                 return VideoPage(asset: a, onToggleUi: _toggleUi);
               }
