@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery/design_colors.dart';
+import 'package:gallery/media_actions_bar.dart';
 import 'package:gallery/video_page.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
@@ -301,40 +302,14 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
               child: SafeArea(
                 top: false,
                 bottom: true,
-                child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                color: DesignColors.primary,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildActionIcon(
-                      icon: Icons.share,
-                      onTap: () => _shareAsset(asset),
-                    ),
-                    if (asset.type == AssetType.image)
-                      _buildActionIcon(
-                        icon: Icons.edit,
-                        onTap: () {
-                          //TODO: edit photo
-                        },
-                      ),
-                    _buildActionIcon(
-                      icon: asset.isFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      onTap: () => _toggleFavorite(asset),
-                    ),
-                    _buildActionIcon(
-                      icon: Icons.delete,
-                      onTap: () => _deleteAsset(asset),
-                    ),
-                    _buildActionIcon(
-                      icon: Icons.more_horiz,
-                      onTap: () => _showMoreOptions(asset),
-                    ),
-                  ],
-                ),
-              ),
+                child: MediaActionsBar(
+                    assets: [asset],
+                    onShare: () => _shareAsset(asset),
+                    onEdit: (){/*TODO*/},
+                    onFavorite: () => _toggleFavorite(asset),
+                    onDelete: () => _deleteAsset(asset),
+                    onMore: () => _showMoreOptions(asset),
+                )
               ),
             ),
         ],
